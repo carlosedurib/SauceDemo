@@ -13,12 +13,14 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  /* saucedemo.com ocasionalmente demora para responder ao primeiro load de uma nova sessão. */
+  timeout: 45_000,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* SauceDemo é um app de demonstração e ocasionalmente responde devagar; retry absorve essa instabilidade. */
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -33,6 +35,13 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Screenshot on failure to speed up debugging of flaky runs against the live site. */
+    screenshot: 'only-on-failure',
+
+    /* saucedemo.com pode demorar sob carga de múltiplas sessões simultâneas. */
+    actionTimeout: 20_000,
+    navigationTimeout: 20_000,
   },
 
   /* Configure projects for major browsers */
